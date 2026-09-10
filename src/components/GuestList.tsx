@@ -235,9 +235,82 @@ export default function GuestList({
         )}
       </div>
 
-      {/* Guest lists grid */}
+      {/* Guest list - Mobile card list & Desktop Table */}
       <div className="bg-white dark:bg-stone-900/60 border border-stone-200/80 dark:border-stone-800 rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Touch-friendly cards */}
+        <div className="md:hidden divide-y divide-stone-100 dark:divide-stone-800">
+          {filteredGuests.map(g => (
+            <div
+              key={g.id}
+              onClick={() => handleOpenEdit(g)}
+              className="p-4 space-y-3 hover:bg-stone-50/50 dark:hover:bg-stone-850/50 cursor-pointer active:bg-stone-100"
+            >
+              <div className="flex justify-between items-start">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-stone-900 dark:text-stone-100 text-sm">
+                    {g.name}
+                    {g.category === 'vip' && <Heart className="w-3.5 h-3.5 text-amber-500 fill-current" />}
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px]">
+                    <span className={`px-2 py-0.5 rounded capitalize font-semibold border ${
+                      g.side === 'bride'
+                        ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/10'
+                        : 'bg-amber-500/10 text-amber-600 border-amber-500/10'
+                    }`}>
+                      {g.side} side
+                    </span>
+                    <span className="text-stone-400 capitalize">• {g.category}</span>
+                  </div>
+                </div>
+
+                <span className={`px-2 py-0.5 rounded capitalize text-[10px] font-bold ${
+                  g.rsvp_status === 'attending' && 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' ||
+                  g.rsvp_status === 'declined' && 'bg-rose-500/10 text-rose-600 border border-rose-500/20' ||
+                  'bg-stone-100 text-stone-500 dark:bg-stone-800 border border-stone-200 dark:border-stone-750'
+                }`}>
+                  {g.rsvp_status}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between pt-1 text-xs text-stone-500">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdateGuest({ ...g, invitation_sent: !g.invitation_sent });
+                    }}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-[11px] font-semibold transition-all ${
+                      g.invitation_sent
+                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600'
+                        : 'border-stone-200 dark:border-stone-800 text-stone-400'
+                    }`}
+                  >
+                    {g.invitation_sent ? <Check className="w-3 h-3 text-emerald-600" /> : <Mail className="w-3 h-3" />}
+                    <span>{g.invitation_sent ? 'Invite Sent' : 'Send Invite'}</span>
+                  </button>
+
+                  <span className="text-[10px] uppercase font-bold text-stone-400 bg-stone-100 dark:bg-stone-800 px-2 py-1 rounded">
+                    {g.food_preference}
+                  </span>
+                </div>
+
+                {g.phone && (
+                  <a
+                    href={`tel:${g.phone}`}
+                    onClick={e => e.stopPropagation()}
+                    className="p-1.5 rounded-lg border border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-100"
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop View: Full Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-stone-200 dark:border-stone-850 bg-stone-50/50 dark:bg-stone-900/80 text-stone-500 dark:text-stone-400 font-bold">

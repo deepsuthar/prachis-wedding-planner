@@ -118,11 +118,7 @@ export const VENDOR_LEAD_TIMES: Record<string, number> = {
 };
 
 export const initialProfiles: Profile[] = [
-  { id: 'p-1', email: 'prachi@wedding.com', full_name: 'Prachi Patel', role: 'admin', phone: '+919876543210' },
-  { id: 'p-2', email: 'amit@wedding.com', full_name: 'Amit Shah (Groom)', role: 'family', phone: '+919999888877' },
-  { id: 'p-3', email: 'rohan@wedding.com', full_name: 'Rohan Patel (Brother)', role: 'family', phone: '+919888777666' },
-  { id: 'p-4', email: 'priya@wedding.com', full_name: 'Priya Sharma (Bridesmaid)', role: 'volunteer', phone: '+919777666555' },
-  { id: 'p-5', email: 'rahul@wedding.com', full_name: 'Rahul Verma (Best Man)', role: 'volunteer', phone: '+919666555444' }
+  { id: 'p-1', email: 'prachi@wedding.com', full_name: 'Prachi Patel', role: 'admin', phone: '+919876543210' }
 ];
 
 export const initialEvents: Event[] = [

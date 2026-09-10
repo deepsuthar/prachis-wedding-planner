@@ -29,7 +29,7 @@ export function Dialog({ isOpen, onClose, children }: DialogProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4 max-sm:items-end">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -41,11 +41,11 @@ export function Dialog({ isOpen, onClose, children }: DialogProps) {
 
           {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            initial={{ opacity: 0, scale: 0.95, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            exit={{ opacity: 0, scale: 0.95, y: 30 }}
             transition={{ type: 'spring', duration: 0.4 }}
-            className="z-10 w-full max-w-lg overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-2xl dark:border-emerald-800/30 dark:bg-stone-900"
+            className="z-10 w-full max-w-lg overflow-hidden rounded-2xl max-sm:rounded-b-none max-sm:rounded-t-3xl max-h-[88vh] overflow-y-auto border border-stone-200/80 bg-white shadow-2xl dark:border-emerald-800/30 dark:bg-stone-900 flex flex-col"
           >
             {children}
           </motion.div>

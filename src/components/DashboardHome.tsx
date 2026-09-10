@@ -15,6 +15,7 @@ interface DashboardHomeProps {
   profiles: Profile[];
   currentUser: Profile;
   onSetCurrentUser: (user: Profile) => void;
+  onClearAllData: () => void;
   weddingDate: string;
 }
 
@@ -27,6 +28,7 @@ export default function DashboardHome({
   profiles,
   currentUser,
   onSetCurrentUser,
+  onClearAllData,
   weddingDate
 }: DashboardHomeProps) {
   const [countdown, setCountdown] = useState<CountdownState | null>(null);
@@ -83,32 +85,44 @@ export default function DashboardHome({
     Actual: Number(b.actual)
   }));
 
+  const showSwitcher = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || localStorage.getItem('pwp_db_mode') === 'local');
+
   return (
     <div className="space-y-8">
-      {/* Role Switcher Sandbox Banner */}
-      <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200/60 dark:border-stone-800/80 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-          <p className="text-xs text-stone-600 dark:text-stone-300 font-medium">
-            <span className="font-semibold text-amber-600 dark:text-amber-500">Sandbox Authorization Switcher:</span> Simulating active member authentication role.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {profiles.map(p => (
+      {/* Role Switcher Sandbox Banner (Only shown in Local/Dev Mode for security) */}
+      {showSwitcher && (
+        <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200/60 dark:border-stone-880/80 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <p className="text-xs text-stone-600 dark:text-stone-300 font-medium">
+              <span className="font-semibold text-amber-600 dark:text-amber-500">Sandbox Authorization Switcher:</span> Simulating active member authentication role.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {profiles.map(p => (
+              <button
+                key={p.id}
+                onClick={() => onSetCurrentUser(p)}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                  currentUser.id === p.id
+                    ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-emerald-600 shadow'
+                    : 'bg-white dark:bg-stone-850 hover:bg-stone-50 border-stone-200 dark:border-stone-850 text-stone-600 dark:text-stone-400'
+                }`}
+              >
+                {p.full_name} ({p.role.toUpperCase()})
+              </button>
+            ))}
             <button
-              key={p.id}
-              onClick={() => onSetCurrentUser(p)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all ${
-                currentUser.id === p.id
-                  ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white border-emerald-600 shadow'
-                  : 'bg-white dark:bg-stone-850 hover:bg-stone-50 border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400'
-              }`}
+              type="button"
+              onClick={onClearAllData}
+              className="px-3 py-1 rounded-lg text-xs font-semibold border border-rose-200 hover:bg-rose-500 hover:text-white dark:border-rose-800 bg-rose-500/10 text-rose-500 transition-all ml-2"
             >
-              {p.full_name} ({p.role.toUpperCase()})
+              Clear All Demo Data
             </button>
-          ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Countdown & Greeting Header */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">

@@ -3,12 +3,25 @@
 -- Enable UUID extension
 create extension if not exists "uuid-ossp";
 
--- Define Enums
-create type user_role as enum ('admin', 'family', 'volunteer');
-create type task_priority as enum ('critical', 'high', 'medium', 'low');
-create type task_status as enum ('not_started', 'in_progress', 'waiting', 'blocked', 'completed', 'cancelled');
-create type booking_status as enum ('not_booked', 'enquired', 'negotiating', 'booked', 'confirmed', 'cancelled');
-create type rsvp_status as enum ('attending', 'declined', 'pending');
+-- Define Enums safely checking if they already exist
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'user_role') then
+    create type user_role as enum ('admin', 'family', 'volunteer');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'task_priority') then
+    create type task_priority as enum ('critical', 'high', 'medium', 'low');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'task_status') then
+    create type task_status as enum ('not_started', 'in_progress', 'waiting', 'blocked', 'completed', 'cancelled');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'booking_status') then
+    create type booking_status as enum ('not_booked', 'enquired', 'negotiating', 'booked', 'confirmed', 'cancelled');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'rsvp_status') then
+    create type rsvp_status as enum ('attending', 'declined', 'pending');
+  end if;
+end$$;
 
 -- 1. Profiles Table
 create table if not exists public.profiles (
@@ -142,6 +155,27 @@ alter table public.vendor_bookings enable row level security;
 -----------------------
 -- SECURITY POLICIES --
 -----------------------
+
+-- Drop existing policies if they exist
+drop policy if exists "Public profiles are viewable by authenticated users" on public.profiles;
+drop policy if exists "Users can update their own profiles" on public.profiles;
+drop policy if exists "Admins can update any profile" on public.profiles;
+drop policy if exists "Authenticated users can read events" on public.events;
+drop policy if exists "Authenticated users can read tasks" on public.tasks;
+drop policy if exists "Authenticated users can read task assignments" on public.task_assignments;
+drop policy if exists "Authenticated users can read shopping items" on public.shopping;
+drop policy if exists "Authenticated users can read budget entries" on public.budget;
+drop policy if exists "Authenticated users can read guests" on public.guests;
+drop policy if exists "Authenticated users can read vendor bookings" on public.vendor_bookings;
+drop policy if exists "Admins can modify events" on public.events;
+drop policy if exists "Admins can modify tasks" on public.tasks;
+drop policy if exists "Admins can modify assignments" on public.task_assignments;
+drop policy if exists "Admins can modify shopping" on public.shopping;
+drop policy if exists "Admins can modify budget" on public.budget;
+drop policy if exists "Admins can modify guests" on public.guests;
+drop policy if exists "Admins can modify vendor bookings" on public.vendor_bookings;
+drop policy if exists "Assigned users can update tasks" on public.tasks;
+drop policy if exists "Assigned users can update shopping" on public.shopping;
 
 -- Profiles Policies
 create policy "Public profiles are viewable by authenticated users"

@@ -150,34 +150,36 @@ export default function ShoppingPlanner({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-      {/* Categories Sidebar */}
-      <div className="rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900/60 p-4 space-y-1.5 shadow-sm">
-        <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-3 px-2">
+      {/* Sidebar categories (Horizontal scroll on mobile, Vertical list on desktop) */}
+      <div className="lg:col-span-1 rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900/60 p-4 space-y-1.5 shadow-sm">
+        <h3 className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 px-1 hidden lg:block">
           Categories
         </h3>
-        {CATEGORIES.map(cat => {
-          const count = shopping.filter(i => {
-            if (selectedEventId && i.event_id !== selectedEventId) return false;
-            return cat === 'All' || i.category === cat;
-          }).length;
+        <div className="flex overflow-x-auto lg:flex-col gap-1 pb-1 lg:pb-0 no-scrollbar">
+          {CATEGORIES.map(cat => {
+            const count = shopping.filter(i => {
+              if (selectedEventId && i.event_id !== selectedEventId) return false;
+              return cat === 'All' || i.category === cat;
+            }).length;
 
-          return (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                selectedCategory === cat
-                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-500'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-850'
-              }`}
-            >
-              <span>{cat}</span>
-              <span className="bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded text-[10px] text-stone-500 dark:text-stone-400">
-                {count}
-              </span>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all shrink-0 lg:w-full ${
+                  selectedCategory === cat
+                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-500 border border-amber-500/20 font-bold'
+                    : 'text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-850 border border-transparent'
+                }`}
+              >
+                <span>{cat}</span>
+                <span className="ml-2 bg-stone-100 dark:bg-stone-800 px-1.5 py-0.5 rounded text-[10px] text-stone-500 dark:text-stone-400">
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Main Items Listing Area */}

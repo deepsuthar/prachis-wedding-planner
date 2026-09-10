@@ -244,7 +244,58 @@ export default function BudgetManager({
           )}
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile View: Touch Cards */}
+        <div className="md:hidden divide-y divide-stone-100 dark:divide-stone-800">
+          {filteredBudget.map(item => {
+            const event = events.find(e => e.id === item.event_id);
+            const isOverrun = item.actual > item.allocated;
+            const pendingBal = item.actual - item.paid;
+
+            return (
+              <div
+                key={item.id}
+                onClick={() => handleOpenEdit(item)}
+                className="p-4 space-y-2.5 hover:bg-stone-50/50 dark:hover:bg-stone-850/50 cursor-pointer active:bg-stone-100"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-1.5 font-bold text-stone-900 dark:text-stone-100 text-sm">
+                      {item.category}
+                      {isOverrun && <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />}
+                    </div>
+                    <span className="text-[10px] text-stone-400 font-semibold">{event?.name || 'General Event'}</span>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 block">
+                      {formatCurrency(item.actual)}
+                    </span>
+                    <span className="text-[10px] text-stone-400">Allocated: {formatCurrency(item.allocated)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-1 border-t border-stone-100 dark:border-stone-850">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-500">
+                      Paid: {formatCurrency(item.paid)}
+                    </span>
+                    {pendingBal > 0 && (
+                      <span className="text-[11px] font-bold text-rose-500">
+                        Due: {formatCurrency(pendingBal)}
+                      </span>
+                    )}
+                  </div>
+                  {item.notes && (
+                    <span className="text-[10px] text-stone-400 max-w-[150px] truncate">{item.notes}</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop View: Full Ledger Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-stone-200 dark:border-stone-850 bg-stone-50/30 dark:bg-stone-900/40 text-stone-500 dark:text-stone-400 font-bold">

@@ -6,6 +6,7 @@ import { useTheme } from '@/app/providers';
 import { Profile, Task, Guest, VendorBooking, BudgetItem, ShoppingItem } from '@/lib/mockData';
 import { Dialog, DialogHeader, DialogTitle, DialogContent } from './ui/Dialog';
 import { getBookingUrgency } from '@/lib/utils';
+import PWAInstallPrompt from './PWAInstallPrompt';
 
 interface HeaderProps {
   currentUser: Profile;
@@ -20,6 +21,9 @@ interface HeaderProps {
   weddingDate: string;
   onOpenTask: (task: Task) => void;
   onOpenBooking: (booking: VendorBooking) => void;
+  onLogout: () => void;
+  isSearchOpenExternal?: boolean;
+  setIsSearchOpenExternal?: (open: boolean) => void;
 }
 
 export default function Header({
@@ -33,12 +37,20 @@ export default function Header({
   shopping,
   weddingDate,
   onOpenTask,
-  onOpenBooking
+  onOpenBooking,
+  onLogout,
+  isSearchOpenExternal,
+  setIsSearchOpenExternal
 }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   
   // Search Modal state
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [internalSearchOpen, setInternalSearchOpen] = useState(false);
+  const isSearchOpen = isSearchOpenExternal !== undefined ? isSearchOpenExternal : internalSearchOpen;
+  const setIsSearchOpen = (open: boolean) => {
+    setInternalSearchOpen(open);
+    if (setIsSearchOpenExternal) setIsSearchOpenExternal(open);
+  };
   const [searchQuery, setSearchQuery] = useState('');
 
   // Notifications dropdown state
@@ -119,7 +131,8 @@ export default function Header({
               { id: 'shopping', label: 'Shopping list' },
               { id: 'budget', label: 'Budget Ledger' },
               { id: 'guests', label: 'Guest List' },
-              { id: 'bookings', label: 'Bookings' }
+              { id: 'bookings', label: 'Bookings' },
+              { id: 'team', label: 'Team' }
             ] as const).map(tab => (
               <button
                 key={tab.id}
@@ -176,6 +189,10 @@ export default function Header({
               )}
             </div>
 
+            {/* PWA Install Button */}
+            <PWAInstallPrompt variant="button" className="hidden sm:flex" />
+            <PWAInstallPrompt variant="icon" className="sm:hidden" />
+
             {/* Theme switcher */}
             <button
               onClick={toggleTheme}
@@ -193,32 +210,15 @@ export default function Header({
               <span className="hidden md:inline-block text-[11px] font-semibold text-stone-600 dark:text-stone-400">
                 {currentUser.full_name.split(' ')[0]}
               </span>
+              <button
+                onClick={onLogout}
+                className="p-1 rounded text-stone-450 hover:text-rose-500 dark:text-stone-400 dark:hover:text-rose-450 hover:bg-stone-50 dark:hover:bg-stone-850 text-[10px] font-bold uppercase transition-all ml-1.5 border border-stone-200 dark:border-stone-800"
+                title="Sign Out"
+              >
+                Sign Out
+              </button>
             </div>
           </div>
-        </div>
-
-        {/* Mobile Navigation bar */}
-        <div className="lg:hidden flex justify-around border-t border-stone-200/40 dark:border-stone-850/50 py-2.5">
-          {([
-            { id: 'dashboard', label: 'Dash' },
-            { id: 'tasks', label: 'Tasks' },
-            { id: 'shopping', label: 'Shop' },
-            { id: 'budget', label: 'Budget' },
-            { id: 'guests', label: 'Guests' },
-            { id: 'bookings', label: 'Book' }
-          ] as const).map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`text-[10px] font-bold uppercase px-2 py-1 rounded transition-colors ${
-                activeTab === tab.id
-                  ? 'text-amber-500 border-b-2 border-amber-500 font-extrabold'
-                  : 'text-stone-400 hover:text-stone-700'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
         </div>
       </div>
 

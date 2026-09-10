@@ -8,12 +8,7 @@ import {
   Guest,
   VendorBooking,
   initialProfiles,
-  initialEvents,
-  initialTasks,
-  initialShopping,
-  initialBudget,
-  initialGuests,
-  initialVendorBookings
+  VENDOR_LEAD_TIMES
 } from './mockData';
 
 // Initialize Supabase Client if env vars are present
@@ -34,7 +29,7 @@ const KEYS = {
   GUESTS: 'pwp_guests',
   VENDORS: 'pwp_vendors',
   CURRENT_USER: 'pwp_current_user',
-  DB_MODE: 'pwp_db_mode' // 'supabase' or 'local'
+  DB_MODE: 'pwp_db_mode'
 };
 
 // Event emitter for realtime updates simulation
@@ -87,7 +82,6 @@ const saveLocal = <T>(key: string, value: T) => {
 
 // Setup realtime subscriptions to Supabase if available
 if (supabase && isBrowser) {
-  // Subscribe to changes in all tables to notify the app in realtime
   const channels = ['profiles', 'events', 'tasks', 'task_assignments', 'shopping', 'budget', 'guests', 'vendor_bookings'];
   channels.forEach(table => {
     supabase
@@ -99,8 +93,50 @@ if (supabase && isBrowser) {
   });
 }
 
-// Memory caches
 let activeDbMode: 'supabase' | 'local' = supabase ? 'supabase' : 'local';
+
+// Setup empty templates for critical vendor booking categories
+const generateEmptyVendorBookings = (): VendorBooking[] => {
+  const categories = [
+    'Venue',
+    'Food Catering',
+    'Photographer',
+    'Videographer',
+    'Decoration',
+    'Flowers',
+    'Lighting',
+    'Wedding Clothes / Tailor',
+    'Makeup Artist',
+    'Jeweler',
+    'Invitation Cards Printing',
+    'DJ / Sound',
+    'Transportation',
+    'Accommodation / Guest Hotel',
+    'Mehendi Artist',
+    'Others'
+  ];
+
+  return categories.map((cat, idx) => ({
+    id: `vb-empty-${idx}`,
+    vendor_name: undefined,
+    category: cat,
+    event_id: undefined,
+    booking_status: 'not_booked',
+    booking_date: undefined,
+    contract_signed: false,
+    advance_paid: 0,
+    balance_due: 0,
+    payment_due_date: undefined,
+    contact_person: undefined,
+    contact_phone: undefined,
+    trial_date: undefined,
+    fitting_date: undefined,
+    notes: undefined,
+    contract_url: undefined
+  }));
+};
+
+const emptyVendorBookings = generateEmptyVendorBookings();
 
 export const db = {
   getDbMode(): 'supabase' | 'local' {
@@ -118,18 +154,10 @@ export const db = {
 
   // 1. PROFILES
   getProfiles(): Profile[] {
-    // If Supabase is connected and mode is active, try to load from Supabase sync
-    // In actual production code, database reads are async, but since our UI components are written synchronously for standard state flows,
-    // we fetch and update states in page.tsx useEffect. We will implement synchronous returns from memory/local storage cache
-    // that get updated in background, OR fallback queries.
-    // To make this fully compatible with the existing code, we will read from local cache which is refreshed in background or loaded from localStorage,
-    // and trigger updates via the emitter when async fetches complete! This is a standard and bulletproof hybrid cache approach.
-    
     if (supabase && activeDbMode === 'supabase') {
       supabase.from('profiles').select('*').then(({ data, error }) => {
         if (error) {
-          console.warn('Supabase profiles query failed, falling back to local:', error.message);
-          if (error.code === '42P01') activeDbMode = 'local'; // Missing tables
+          if (error.code === '42P01') activeDbMode = 'local';
         } else if (data && data.length > 0) {
           const profilesList: Profile[] = data.map(d => ({
             id: d.id,
@@ -144,9 +172,8 @@ export const db = {
             dbEmitter.notify();
           }
         } else if (data && data.length === 0) {
-          // Auto-seed profiles to Supabase
+          // Auto-seed active profiles so the switcher is functional
           initialProfiles.forEach(p => {
-            // We use upsert to insert seed profiles
             supabase.from('profiles').upsert({
               id: p.id,
               email: p.email,
@@ -175,19 +202,39 @@ export const db = {
         full_name: profile.full_name,
         role: profile.role,
         phone: profile.phone
-      }).then(({ error }) => {
-        if (error) console.error('Supabase profile save error:', error.message);
-      });
+      }).then();
     }
   },
 
-  getCurrentUser(): Profile {
-    const defaultUser = initialProfiles[0]; // Prachi (Admin)
-    return loadLocal<Profile>(KEYS.CURRENT_USER, defaultUser);
+  deleteProfile(id: string) {
+    const list = this.getProfiles();
+    const filtered = list.filter(p => p.id !== id);
+    saveLocal(KEYS.PROFILES, filtered);
+
+    if (supabase && activeDbMode === 'supabase') {
+      supabase.from('profiles').delete().eq('id', id).then();
+    }
   },
 
-  setCurrentUser(user: Profile) {
-    saveLocal(KEYS.CURRENT_USER, user);
+  getCurrentUser(): Profile | null {
+    if (!isBrowser) return null;
+    const stored = localStorage.getItem(KEYS.CURRENT_USER);
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored) as Profile;
+    } catch {
+      return null;
+    }
+  },
+
+  setCurrentUser(user: Profile | null) {
+    if (!isBrowser) return;
+    if (user === null) {
+      localStorage.removeItem(KEYS.CURRENT_USER);
+    } else {
+      localStorage.setItem(KEYS.CURRENT_USER, JSON.stringify(user));
+    }
+    dbEmitter.notify();
   },
 
   // 2. EVENTS
@@ -196,7 +243,7 @@ export const db = {
       supabase.from('events').select('*').then(({ data, error }) => {
         if (error) {
           if (error.code === '42P01') activeDbMode = 'local';
-        } else if (data && data.length > 0) {
+        } else if (data) {
           const eventsList: Event[] = data.map(d => ({
             id: d.id,
             name: d.name,
@@ -210,23 +257,11 @@ export const db = {
             localStorage.setItem(KEYS.EVENTS, JSON.stringify(eventsList));
             dbEmitter.notify();
           }
-        } else if (data && data.length === 0) {
-          // Auto seed
-          initialEvents.forEach(e => {
-            supabase.from('events').insert({
-              id: e.id,
-              name: e.name,
-              date: e.date,
-              color_gradient: e.color_gradient,
-              completion_percentage: e.completion_percentage,
-              is_archived: e.is_archived
-            }).then();
-          });
         }
       });
     }
 
-    const events = loadLocal<Event[]>(KEYS.EVENTS, initialEvents);
+    const events = loadLocal<Event[]>(KEYS.EVENTS, []);
     const tasks = this.getTasks();
     const updatedEvents = events.map(event => {
       const eventTasks = tasks.filter(t => t.event_id === event.id);
@@ -239,7 +274,7 @@ export const db = {
   },
 
   saveEvent(event: Event) {
-    const list = loadLocal<Event[]>(KEYS.EVENTS, initialEvents);
+    const list = loadLocal<Event[]>(KEYS.EVENTS, []);
     const idx = list.findIndex(e => e.id === event.id);
     if (idx >= 0) list[idx] = event;
     else list.push(event);
@@ -258,7 +293,7 @@ export const db = {
   },
 
   deleteEvent(eventId: string) {
-    const list = loadLocal<Event[]>(KEYS.EVENTS, initialEvents);
+    const list = loadLocal<Event[]>(KEYS.EVENTS, []);
     const filtered = list.filter(e => e.id !== eventId);
     saveLocal(KEYS.EVENTS, filtered);
 
@@ -274,7 +309,6 @@ export const db = {
   // 3. TASKS
   getTasks(): Task[] {
     if (supabase && activeDbMode === 'supabase') {
-      // Load tasks and join with assignments
       Promise.all([
         supabase.from('tasks').select('*'),
         supabase.from('task_assignments').select('*')
@@ -283,7 +317,7 @@ export const db = {
         const tasksData = tasksRes.data;
         const assignmentsData = assignmentsRes.data || [];
 
-        if (tasksData && tasksData.length > 0) {
+        if (tasksData) {
           const tasksList: Task[] = tasksData.map(t => {
             const taskAssigns = assignmentsData
               .filter(a => a.task_id === t.id)
@@ -310,34 +344,10 @@ export const db = {
             localStorage.setItem(KEYS.TASKS, JSON.stringify(tasksList));
             dbEmitter.notify();
           }
-        } else if (tasksData && tasksData.length === 0) {
-          // Seed tasks
-          initialTasks.forEach(t => {
-            supabase.from('tasks').insert({
-              id: t.id,
-              event_id: t.event_id,
-              name: t.name,
-              description: t.description,
-              category: t.category,
-              priority: t.priority,
-              due_date: t.due_date,
-              status: t.status,
-              checklist: t.checklist,
-              comments: t.comments,
-              completion_percentage: t.completion_percentage
-            }).then(() => {
-              t.assigned_to.forEach(pid => {
-                supabase.from('task_assignments').insert({
-                  task_id: t.id,
-                  profile_id: pid
-                }).then();
-              });
-            });
-          });
         }
       });
     }
-    return loadLocal<Task[]>(KEYS.TASKS, initialTasks);
+    return loadLocal<Task[]>(KEYS.TASKS, []);
   },
 
   saveTask(task: Task) {
@@ -361,7 +371,6 @@ export const db = {
         comments: task.comments,
         completion_percentage: task.completion_percentage
       }).then(() => {
-        // Handle many-to-many assignments sync
         supabase.from('task_assignments').delete().eq('task_id', task.id).then(() => {
           task.assigned_to.forEach(profileId => {
             supabase.from('task_assignments').insert({
@@ -389,7 +398,7 @@ export const db = {
     if (supabase && activeDbMode === 'supabase') {
       supabase.from('shopping').select('*').then(({ data, error }) => {
         if (error) return;
-        if (data && data.length > 0) {
+        if (data) {
           const shoppingList: ShoppingItem[] = data.map(d => ({
             id: d.id,
             event_id: d.event_id,
@@ -408,27 +417,10 @@ export const db = {
             localStorage.setItem(KEYS.SHOPPING, JSON.stringify(shoppingList));
             dbEmitter.notify();
           }
-        } else if (data && data.length === 0) {
-          // Seed
-          initialShopping.forEach(s => {
-            supabase.from('shopping').insert({
-              id: s.id,
-              event_id: s.event_id,
-              name: s.name,
-              category: s.category,
-              quantity: s.quantity,
-              budget: s.budget,
-              actual_price: s.actual_price,
-              store: s.store,
-              status: s.status,
-              assigned_to: s.assigned_to,
-              receipt_url: s.receipt_url
-            }).then();
-          });
         }
       });
     }
-    return loadLocal<ShoppingItem[]>(KEYS.SHOPPING, initialShopping);
+    return loadLocal<ShoppingItem[]>(KEYS.SHOPPING, []);
   },
 
   saveShoppingItem(item: ShoppingItem) {
@@ -470,7 +462,7 @@ export const db = {
     if (supabase && activeDbMode === 'supabase') {
       supabase.from('budget').select('*').then(({ data, error }) => {
         if (error) return;
-        if (data && data.length > 0) {
+        if (data) {
           const budgetList: BudgetItem[] = data.map(d => ({
             id: d.id,
             event_id: d.event_id,
@@ -485,23 +477,10 @@ export const db = {
             localStorage.setItem(KEYS.BUDGET, JSON.stringify(budgetList));
             dbEmitter.notify();
           }
-        } else if (data && data.length === 0) {
-          // Seed
-          initialBudget.forEach(b => {
-            supabase.from('budget').insert({
-              id: b.id,
-              event_id: b.event_id,
-              category: b.category,
-              allocated: b.allocated,
-              actual: b.actual,
-              paid: b.paid,
-              notes: b.notes
-            }).then();
-          });
         }
       });
     }
-    return loadLocal<BudgetItem[]>(KEYS.BUDGET, initialBudget);
+    return loadLocal<BudgetItem[]>(KEYS.BUDGET, []);
   },
 
   saveBudgetItem(item: BudgetItem) {
@@ -539,7 +518,7 @@ export const db = {
     if (supabase && activeDbMode === 'supabase') {
       supabase.from('guests').select('*').then(({ data, error }) => {
         if (error) return;
-        if (data && data.length > 0) {
+        if (data) {
           const guestsList: Guest[] = data.map(d => ({
             id: d.id,
             name: d.name,
@@ -555,24 +534,10 @@ export const db = {
             localStorage.setItem(KEYS.GUESTS, JSON.stringify(guestsList));
             dbEmitter.notify();
           }
-        } else if (data && data.length === 0) {
-          // Seed
-          initialGuests.forEach(g => {
-            supabase.from('guests').insert({
-              id: g.id,
-              name: g.name,
-              category: g.category,
-              side: g.side,
-              rsvp_status: g.rsvp_status,
-              invitation_sent: g.invitation_sent,
-              food_preference: g.food_preference,
-              phone: g.phone
-            }).then();
-          });
         }
       });
     }
-    return loadLocal<Guest[]>(KEYS.GUESTS, initialGuests);
+    return loadLocal<Guest[]>(KEYS.GUESTS, []);
   },
 
   saveGuest(guest: Guest) {
@@ -636,31 +601,31 @@ export const db = {
             dbEmitter.notify();
           }
         } else if (data && data.length === 0) {
-          // Seed
-          initialVendorBookings.forEach(v => {
+          // Seed ONLY empty vendor category slots to set up the tracker layout
+          emptyVendorBookings.forEach(v => {
             supabase.from('vendor_bookings').insert({
               id: v.id,
-              vendor_name: v.vendor_name,
+              vendor_name: null,
               category: v.category,
-              event_id: v.event_id,
-              booking_status: v.booking_status,
-              booking_date: v.booking_date,
-              contract_signed: v.contract_signed,
-              advance_paid: v.advance_paid,
-              balance_due: v.balance_due,
-              payment_due_date: v.payment_due_date,
-              contact_person: v.contact_person,
-              contact_phone: v.contact_phone,
-              trial_date: v.trial_date,
-              fitting_date: v.fitting_date,
-              notes: v.notes,
-              contract_url: v.contract_url
+              event_id: null,
+              booking_status: 'not_booked',
+              booking_date: null,
+              contract_signed: false,
+              advance_paid: 0,
+              balance_due: 0,
+              payment_due_date: null,
+              contact_person: null,
+              contact_phone: null,
+              trial_date: null,
+              fitting_date: null,
+              notes: null,
+              contract_url: null
             }).then();
           });
         }
       });
     }
-    return loadLocal<VendorBooking[]>(KEYS.VENDORS, initialVendorBookings);
+    return loadLocal<VendorBooking[]>(KEYS.VENDORS, emptyVendorBookings);
   },
 
   saveVendorBooking(booking: VendorBooking) {
