@@ -172,6 +172,28 @@ export default function PWAInstallPrompt({ variant = 'button', className = '' }:
               </ol>
             </div>
           )}
+
+          {/* Shareable App Card Preview */}
+          <div className="border-t border-stone-100 dark:border-stone-800 pt-3 space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <span className="font-bold text-stone-900 dark:text-stone-100">Share App Poster</span>
+              <a
+                href="/share-card.jpg"
+                download="Prachi_Wedding_App_Share_Card.jpg"
+                className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+              >
+                <Download className="w-3 h-3" />
+                Download Image Card
+              </a>
+            </div>
+            <div className="relative rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 max-h-48 flex justify-center bg-stone-900">
+              <img
+                src="/share-card.jpg"
+                alt="Prachi Wedding App Share Poster"
+                className="h-full object-contain"
+              />
+            </div>
+          </div>
         </DialogContent>
         <DialogFooter>
           <button
