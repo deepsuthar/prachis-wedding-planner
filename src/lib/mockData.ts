@@ -119,7 +119,7 @@ export const VENDOR_LEAD_TIMES: Record<string, number> = {
 
 export const initialProfiles: Profile[] = [
   { id: 'p-1', email: 'prachi@wedding.com', full_name: 'Prachi Patel', role: 'admin', phone: '+919876543210' },
-  { id: 'p-2', email: 'ronak@wedding.com', full_name: 'Ronak Shah', role: 'admin', phone: '+919876543211' }
+  { id: 'p-2', email: 'ronak@wedding.com', full_name: 'Ronak Patel', role: 'admin', phone: '+919876543211' }
 ];
 
 export const initialEvents: Event[] = [
@@ -238,7 +238,7 @@ export const initialTasks: Task[] = [
       { id: 'c-6-3', text: 'Pay deposit amount', completed: true }
     ],
     comments: [
-      { id: 'cm-6-1', author: 'Ronak Shah', text: 'Royal Palace Hall booked, waiting for registrar approval.', timestamp: '2026-07-16T15:20:00Z' }
+      { id: 'cm-6-1', author: 'Ronak Patel', text: 'Royal Palace Hall booked, waiting for registrar approval.', timestamp: '2026-07-16T15:20:00Z' }
     ],
     completion_percentage: 66
   },
@@ -299,7 +299,7 @@ export const initialBudget: BudgetItem[] = [
 export const initialGuests: Guest[] = [
   { id: 'g-1', name: 'Dinesh Patel (Uncle)', category: 'family', side: 'bride', rsvp_status: 'attending', invitation_sent: true, food_preference: 'veg', phone: '+919900990099' },
   { id: 'g-2', name: 'Savita Patel (Aunt)', category: 'family', side: 'bride', rsvp_status: 'attending', invitation_sent: true, food_preference: 'veg', phone: '+919900990088' },
-  { id: 'g-3', name: 'Vikram Shah', category: 'family', side: 'groom', rsvp_status: 'attending', invitation_sent: true, food_preference: 'veg', phone: '+919911991199' },
+  { id: 'g-3', name: 'Vikram Patel', category: 'family', side: 'groom', rsvp_status: 'attending', invitation_sent: true, food_preference: 'veg', phone: '+919911991199' },
   { id: 'g-4', name: 'Kabir Mehta (College Friend)', category: 'friend', side: 'bride', rsvp_status: 'pending', invitation_sent: true, food_preference: 'non-veg', phone: '+919877766611' },
   { id: 'g-5', name: 'Ayesha Khan (VIP Guest)', category: 'vip', side: 'groom', rsvp_status: 'pending', invitation_sent: false, food_preference: 'non-veg', phone: '+919866655522' },
   { id: 'g-6', name: 'Rajesh Sharma', category: 'friend', side: 'groom', rsvp_status: 'declined', invitation_sent: true, food_preference: 'veg', phone: '+919855544433' }

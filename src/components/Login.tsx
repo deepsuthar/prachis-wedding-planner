@@ -215,7 +215,7 @@ export default function Login({ onAuthSuccess, localProfiles }: LoginProps) {
                     required
                     value={fullName}
                     onChange={e => setFullName(e.target.value)}
-                    placeholder="e.g. Ronak Shah"
+                    placeholder="e.g. Ronak Patel"
                     className="w-full pl-10 pr-4 py-2 text-xs border border-border rounded-lg bg-transparent focus:outline-none focus:ring-1 focus:ring-amber-500 text-stone-900 dark:text-stone-100"
                   />
                 </div>
