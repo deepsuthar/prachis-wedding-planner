@@ -136,7 +136,7 @@ export default function DashboardHome({
           <div>
             <div className="flex items-center gap-2 text-amber-600 dark:text-amber-500 font-semibold text-sm mb-3">
               <Heart className="w-4.5 h-4.5 fill-current" />
-              <span>Prachi & Amit’s Wedding Day</span>
+              <span>Prachi & Ronak’s Wedding Day</span>
             </div>
             <h1 className="font-serif text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100 tracking-tight leading-tight">
               Namaste, {currentUser.full_name}!

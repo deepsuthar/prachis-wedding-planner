@@ -12,7 +12,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Prachi's Wedding Planner | Luxury Celebrations Coordinator",
-  description: "A premium, festive, high-performance wedding planner dashboard for Prachi & Amit's dream wedding celebration. Plan schedules, budgets, guests, and vendor bookings.",
+  description: "A premium, festive, high-performance wedding planner dashboard for Prachi & Ronak's dream wedding celebration. Plan schedules, budgets, guests, and vendor bookings.",
   keywords: "wedding planner, wedding dashboard, prachi wedding, marriage coordinator, guest list, budget manager, vendor tracker",
   manifest: '/manifest.json',
   appleWebApp: {

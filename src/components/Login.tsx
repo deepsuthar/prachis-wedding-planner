@@ -85,7 +85,7 @@ export default function Login({ onAuthSuccess, localProfiles }: LoginProps) {
         onAuthSuccess(matched);
         triggerConfetti();
       } else {
-        setErrorMessage('Local simulation: User email not found. Try prachi@wedding.com, amit@wedding.com, or rohan@wedding.com.');
+        setErrorMessage('Local simulation: User email not found. Try prachi@wedding.com, ronak@wedding.com, or rohan@wedding.com.');
       }
     }
     setLoading(false);
