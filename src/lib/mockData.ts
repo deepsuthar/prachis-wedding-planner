@@ -118,7 +118,8 @@ export const VENDOR_LEAD_TIMES: Record<string, number> = {
 };
 
 export const initialProfiles: Profile[] = [
-  { id: 'p-1', email: 'prachi@wedding.com', full_name: 'Prachi Patel', role: 'admin', phone: '+919876543210' }
+  { id: 'p-1', email: 'prachi@wedding.com', full_name: 'Prachi Patel', role: 'admin', phone: '+919876543210' },
+  { id: 'p-2', email: 'ronak@wedding.com', full_name: 'Ronak Shah', role: 'admin', phone: '+919876543211' }
 ];
 
 export const initialEvents: Event[] = [
@@ -214,7 +215,7 @@ export const initialTasks: Task[] = [
     status: 'in_progress',
     checklist: [
       { id: 'c-5-1', text: 'Prachi outfit fitting', completed: true },
-      { id: 'c-5-2', text: 'Amit kurta stitching', completed: false }
+      { id: 'c-5-2', text: 'Ronak kurta stitching', completed: false }
     ],
     comments: [],
     completion_percentage: 50
@@ -237,7 +238,7 @@ export const initialTasks: Task[] = [
       { id: 'c-6-3', text: 'Pay deposit amount', completed: true }
     ],
     comments: [
-      { id: 'cm-6-1', author: 'Amit Shah', text: 'Royal Palace Hall booked, waiting for registrar approval.', timestamp: '2026-07-16T15:20:00Z' }
+      { id: 'cm-6-1', author: 'Ronak Shah', text: 'Royal Palace Hall booked, waiting for registrar approval.', timestamp: '2026-07-16T15:20:00Z' }
     ],
     completion_percentage: 66
   },
