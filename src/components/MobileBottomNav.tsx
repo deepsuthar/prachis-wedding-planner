@@ -71,12 +71,12 @@ export default function MobileBottomNav({
         }`}
       >
         <div className="flex justify-between items-center border-b border-stone-100 dark:border-stone-800 pb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white">
-              <Heart className="w-4 h-4 fill-current animate-pulse" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-amber-500/30 shrink-0">
+              <img src="/icons/prachi-avatar.png" alt="Prachi" className="w-full h-full object-cover" />
             </div>
             <span className="font-serif text-sm font-bold text-stone-900 dark:text-stone-100">
-              Wedding Navigation Menu
+              Prachi's Wedding Navigation
             </span>
           </div>
           <button

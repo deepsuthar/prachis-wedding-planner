@@ -109,9 +109,13 @@ export default function Header({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-700 dark:from-emerald-700 dark:to-emerald-800 flex items-center justify-center shadow shadow-emerald-600/10">
-              <Heart className="w-4.5 h-4.5 text-white fill-current animate-pulse" />
+          <div className="flex items-center gap-2.5">
+            <div className="relative w-9 h-9 rounded-full overflow-hidden ring-2 ring-amber-500/40 shadow-sm shrink-0">
+              <img
+                src="/icons/prachi-avatar.png"
+                alt="Prachi"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
               <span className="font-serif text-base sm:text-lg font-bold bg-gradient-to-r from-emerald-800 to-amber-700 dark:from-stone-100 dark:to-amber-500 bg-clip-text text-transparent tracking-tight">
